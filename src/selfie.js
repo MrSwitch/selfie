@@ -3,6 +3,7 @@ import ready from './utils/events/ready.js';
 import getUserMedia from './utils/support/getUserMedia.js';
 import requestAnimationFrame from './utils/support/requestAnimationFrame.js';
 import append from './utils/dom/append.js';
+import prepend from './utils/dom/prepend.js';
 import query from './utils/dom/query.js';
 import param from './utils/string/param.js';
 import objectFit from './utils/dom/objectfit.js';
@@ -20,19 +21,22 @@ const canvasCSSText = param({
 }, ';', ':');
 
 const videoCSSText = param({
-	display:'none',
+	display: 'none',
 }, ';', ':');
 
 const photosCSSText = param({
-	position:'absolute',
-	bottom:0,
-	left:0,
-	right:0
+	position: 'absolute',
+	'white-space': 'nowrap',
+	'overflow': 'auto',
+	height: '10%',
+	bottom: 0,
+	left: 0,
+	right: 0
 }, ';', ':');
 
 const imgCSSText = param({
 	display: 'inline-block',
-	border: '10px solid white'
+	border: '1vh solid white'
 }, ';', ':');
 
 
@@ -62,17 +66,22 @@ ready(() => {
 
 function keypress(e) {
 	if (e.charCode === 32) {
-		record();
+		record(e);
 	}
 }
 
-function record() {
+function record(e) {
 	// Get the image data from the source
 	if (stream && stream.active) {
 		source.canvas.toBlob(handleBlob);
 	}
 	else{
 		cameraPower();
+	}
+
+	if (e) {
+		e.stopPropagation();
+		e.preventDefault();
 	}
 }
 
@@ -84,14 +93,17 @@ function handleBlob(blob) {
 	var url = URL.createObjectURL(blob);
 
 	// Create a new image
-	append('img', {
+	prepend('img', {
 		src: url,
-		width: '100px',
+		height: '100%',
 		style: imgCSSText,
 		onclick: () => {
 			viewer(url);
 		}
 	}, photos);
+
+	// Ensure its in focus
+	photos.scrollLeft = 0;
 }
 
 function cameraPower() {
